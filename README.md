@@ -5,7 +5,7 @@
 ## Requirements
 
 - Python `3.12.x`
-- Bitbucket App Password с правами:
+- Bitbucket API token с правами:
   - `Repositories: Read`
   - `Pull requests: Read`
 
@@ -26,8 +26,15 @@ pip install -r requirements.txt
 ## Auth
 
 ```bash
+export BB_API_TOKEN="<your-api-token>"
 export BB_USERNAME="<your-bitbucket-username>"
-export BB_APP_PASSWORD="<your-app-password>"
+```
+
+Альтернатива, если в вашем workspace принято логиниться email:
+
+```bash
+export BB_API_TOKEN="<your-api-token>"
+export BB_EMAIL="<your-atlassian-email>"
 ```
 
 ## Run
@@ -74,6 +81,6 @@ Dataset values:
 
 ## Troubleshooting
 
-- `401/403`: проверьте `BB_USERNAME`/`BB_APP_PASSWORD` и права App Password.
+- `401/403`: проверьте `BB_API_TOKEN` и `BB_USERNAME` (или `BB_EMAIL`) и права токена.
 - Частые `429`: увеличьте `--throttle` (например, `0.2` или `0.3`).
 - `changes_requested_human` всегда `0`: это зависит от payload вашего Bitbucket activity, скрипт считает best-effort.

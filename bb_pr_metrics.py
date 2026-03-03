@@ -81,10 +81,10 @@ def build_sprints(now_utc: datetime, count: int) -> List[Sprint]:
 
 
 class BBClient:
-    def __init__(self, workspace: str, username: str, app_password: str, throttle_s: float = 0.1):
+    def __init__(self, workspace: str, auth_user: str, auth_secret: str, throttle_s: float = 0.1):
         self.workspace = workspace
         self.session = requests.Session()
-        self.session.auth = (username, app_password)
+        self.session.auth = (auth_user, auth_secret)
         self.session.headers.update({"Accept": "application/json"})
         self.throttle_s = throttle_s
 
@@ -545,17 +545,31 @@ def main() -> int:
     )
     args = ap.parse_args()
 
-    username = os.environ.get("BB_USERNAME", "").strip()
-    app_pw = os.environ.get("BB_APP_PASSWORD", "").strip()
-    if not username or not app_pw:
-        print("ERROR: Set BB_USERNAME and BB_APP_PASSWORD env vars.", file=sys.stderr)
+    # Bitbucket API token auth:
+    #   BB_USERNAME + BB_API_TOKEN (preferred)
+    #   BB_EMAIL + BB_API_TOKEN (fallback)
+    bb_username = os.environ.get("BB_USERNAME", "").strip()
+    bb_email = os.environ.get("BB_EMAIL", "").strip()
+    bb_api_token = os.environ.get("BB_API_TOKEN", "").strip()
+
+    auth_user = ""
+    auth_secret = ""
+
+    if bb_api_token and (bb_username or bb_email):
+        auth_user = bb_username or bb_email
+        auth_secret = bb_api_token
+    else:
+        print(
+            "ERROR: Set BB_API_TOKEN and one of BB_USERNAME/BB_EMAIL env vars.",
+            file=sys.stderr,
+        )
         return 2
 
     project_uuid = args.project_uuid.strip()
     if project_uuid.startswith("{") and project_uuid.endswith("}"):
         project_uuid = project_uuid[1:-1]
 
-    bb = BBClient(args.workspace, username, app_pw, throttle_s=args.throttle)
+    bb = BBClient(args.workspace, auth_user, auth_secret, throttle_s=args.throttle)
 
     now = datetime.now(timezone.utc)
     sprints = build_sprints(now, args.sprints)
