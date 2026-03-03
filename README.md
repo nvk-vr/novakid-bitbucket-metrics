@@ -1,15 +1,15 @@
 # Bitbucket PR Metrics (Kids Area)
 
-Скрипт собирает метрики Pull Request из Bitbucket Cloud по репозиториям проекта и считает агрегаты по спринтам `Thu 07:30 UTC`.
+This script collects Pull Request metrics from Bitbucket Cloud across project repositories and computes sprint-level aggregates using `Thu 07:30 UTC` boundaries.
 
 ## Requirements
 
 - Python `3.12.x`
-- Bitbucket API token с правами:
+- Bitbucket API token with permissions:
   - `Repositories: Read`
   - `Pull requests: Read`
 
-Проверка версии:
+Check Python version:
 
 ```bash
 python3.12 --version
@@ -30,7 +30,7 @@ export BB_API_TOKEN="<your-api-token>"
 export BB_USERNAME="<your-bitbucket-username>"
 ```
 
-Альтернатива, если в вашем workspace принято логиниться email:
+Alternative if your workspace uses email-based login:
 
 ```bash
 export BB_API_TOKEN="<your-api-token>"
@@ -39,7 +39,7 @@ export BB_EMAIL="<your-atlassian-email>"
 
 ## Run
 
-Пример для вашего workspace/project:
+Example for your workspace/project:
 
 ```bash
 python3.12 bb_pr_metrics.py \
@@ -49,19 +49,19 @@ python3.12 bb_pr_metrics.py \
   --out ./out
 ```
 
-Полезные флаги:
+Useful flags:
 
-- `--no-diffstat` — быстрее, пропускает diffstat.
-- `--no-include-total` — не добавлять `kids_area_total` в CSV.
-- `--no-report-md` — не генерировать markdown отчёт.
+- `--no-diffstat` - faster, skips diffstat calls.
+- `--no-include-total` - do not add `kids_area_total` rows to CSV.
+- `--no-report-md` - do not generate markdown report.
 
 ## Outputs
 
-После запуска в `./out`:
+After running, files in `./out`:
 
-1. `pr_facts.csv` — сырые факты по каждому PR.
-2. `sprint_repo_metrics.csv` — метрики `repo × sprint × dataset`.
-3. `sprint_report.md` — человекочитаемый отчёт для Confluence/Slack.
+1. `pr_facts.csv` - raw PR-level facts.
+2. `sprint_repo_metrics.csv` - metrics by `repo × sprint × dataset`.
+3. `sprint_report.md` - human-readable report for Confluence/Slack.
 
 Dataset values:
 
@@ -74,13 +74,13 @@ Dataset values:
 
 ## Metric rules
 
-- Спринт: `Thu 07:30 UTC`, длина 14 дней.
-- `first response`: любая активность не от автора PR и не от `claude-review-bot`.
-- `chore/bump` PR не исключаются, а помечаются; отдельный dataset `feature_no_chore_bump` их исключает.
-- `kids_area_total` строится как агрегация по всем repo в том же спринте и dataset.
+- Sprint boundary: `Thu 07:30 UTC`, sprint length is 14 days.
+- `first response`: any activity not made by the PR author and not made by `claude-review-bot`.
+- `chore/bump` PRs are not removed; they are flagged, and `feature_no_chore_bump` excludes them as a separate dataset.
+- `kids_area_total` is computed as aggregation across all repos for the same sprint and dataset.
 
 ## Troubleshooting
 
-- `401/403`: проверьте `BB_API_TOKEN` и `BB_USERNAME` (или `BB_EMAIL`) и права токена.
-- Частые `429`: увеличьте `--throttle` (например, `0.2` или `0.3`).
-- `changes_requested_human` всегда `0`: это зависит от payload вашего Bitbucket activity, скрипт считает best-effort.
+- `401/403`: verify `BB_API_TOKEN` and `BB_USERNAME` (or `BB_EMAIL`), and confirm token permissions.
+- Frequent `429`: increase `--throttle` (for example, `0.2` or `0.3`).
+- `changes_requested_human` always `0`: this depends on your Bitbucket activity payload; the script calculates it on a best-effort basis.
